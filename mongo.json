@@ -1,0 +1,5 @@
+{"_id":{"$oid":"5c0a03591d41c897fe1cef8a"},"name":"fitness special","description":"Limited edition fitness watch","picture":"/static/images/weave1.jpg","price":249.99000549316406,"tags":["watch"]}
+{"_id":{"$oid":"5c0a04281d41c897fe1cef8b"},"name":"Infuser water bottle","description":"For all those althelets out there, a perfect bottle to enrich you","picture":"/static/images/puma_1.jpeg","price":34.59000015258789,"tags":["bottle"]}
+{"_id":{"$oid":"5c0a047f1d41c897fe1cef8c"},"name":"Classic Tread Mill","description":"Classic Tread Mill","picture":"/static/images/youtube_1.jpeg","price":800.0,"tags":["running"]}
+{"_id":{"$oid":"5c0a04af1d41c897fe1cef8d"},"name":"Baby Tracker","description":"Baby Tracker","picture":"/static/images/catsocks_1.jpg","price":99.0,"tags":["baby"]}
+{"_id":{"$oid":"5c0a04af1d41c897fe1cef8e"},"name":"Ear Buds with Heart Monitor","description":"Ear Buds with Heart Monitor","picture":"/static/images/cross_1.jpeg","price":169.59,"tags":["earbuds"]}
