@@ -1,6 +1,9 @@
 package catalog
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/globalsign/mgo"
 	"github.com/sirupsen/logrus"
 )
@@ -26,10 +29,18 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 	Session, error := mgo.Dial(MongoDBUrl)
 
 	if error != nil {
-		logger.Fatalf("Could not connect to database %s", dbName)
+		fmt.Printf("Could not connect to database %s\n", dbName)
+		logger.Fatalf(error.Error())
+		os.Exit(1)
+
 	}
 
 	db = Session.DB(dbName)
+
+	error = db.Session.Ping()
+	if error != nil {
+		logger.Errorf("Unable to connect to database %s", dbName)
+	}
 
 	collection = db.C(collectionName)
 
