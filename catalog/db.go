@@ -1,9 +1,8 @@
 package catalog
 
 import (
-	"log"
-
 	"github.com/globalsign/mgo"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -22,12 +21,12 @@ const (
 )
 
 // ConnectDB accepts name of database and collection as a string
-func ConnectDB(dbName string, collectionName string) *mgo.Session {
+func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo.Session {
 
 	Session, error := mgo.Dial(MongoDBUrl)
 
 	if error != nil {
-		log.Fatal(error)
+		logger.Fatalf("Could not connect to database %s", dbName)
 	}
 
 	db = Session.DB(dbName)
@@ -38,8 +37,8 @@ func ConnectDB(dbName string, collectionName string) *mgo.Session {
 }
 
 // CloseDB accepst Session as input to close Connection to the database
-func CloseDB(s *mgo.Session) {
+func CloseDB(s *mgo.Session, logger *logrus.Logger) {
 
 	defer s.Close()
-	log.Println("Closed connection to db")
+	logger.Info("Closed connection to db")
 }
