@@ -29,7 +29,7 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 	Session, error := mgo.Dial(MongoDBUrl)
 
 	if error != nil {
-		fmt.Printf("Could not connect to database %s\n", dbName)
+		fmt.Printf(error.Error())
 		logger.Fatalf(error.Error())
 		os.Exit(1)
 
