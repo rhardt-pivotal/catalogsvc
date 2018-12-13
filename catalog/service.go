@@ -3,10 +3,15 @@ package catalog
 import (
 	"net/http"
 
+	"github.com/opentracing/opentracing-go/ext"
+	"github.com/opentracing/opentracing-go/log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
+	stdopentracing "github.com/opentracing/opentracing-go"
 )
 
+// Product struct
 type Product struct {
 	ID          bson.ObjectId `json:"id" bson:"_id,omitempty"`
 	Name        string        `json:"name"`
@@ -20,10 +25,19 @@ type Product struct {
 func GetProducts(c *gin.Context) {
 	var products []Product
 
+	span, _ := stdopentracing.StartSpanFromContext(c, "get_products")
+	defer span.Finish()
+
+	span.LogFields(
+		log.String("event", "string-format"),
+	)
+
 	error := collection.Find(nil).All(&products)
 
 	if error != nil {
 		message := "Products " + error.Error()
+		ext.Error.Set(span, true) // Tag the span as errored
+		span.LogEventWithPayload("GET service error", message)
 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
 		return
 	}
@@ -36,12 +50,22 @@ func GetProducts(c *gin.Context) {
 func GetProduct(c *gin.Context) {
 	var product Product
 
+	span, _ := stdopentracing.StartSpanFromContext(c, "get_product")
+	defer span.Finish()
+
 	productID := c.Param("id")
+
+	span.LogFields(
+		log.String("event", "string-format"),
+		log.String("ProductID", productID),
+	)
 
 	error := collection.FindId(bson.ObjectIdHex(productID)).One(&product)
 
 	if error != nil {
 		message := "Product " + error.Error()
+		ext.Error.Set(span, true) // Tag the span as errored
+		span.LogEventWithPayload("GET product error", message)
 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
 		return
 	}

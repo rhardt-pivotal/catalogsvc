@@ -1,23 +1,27 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ishrivatsa/catalogservice/catalog"
-	"github.com/opentracing/opentracing-go"
+	stdopentracing "github.com/opentracing/opentracing-go"
+	zipkintracer "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/sirupsen/logrus"
 )
 
-var logger *logrus.Logger
+var (
+	logger      *logrus.Logger
+	zip         = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
+	serviceName = "catalog"
+)
 
 const (
 	dbName         = "catalog"
 	collectionName = "products"
 )
-
-var tracer opentracing.Tracer
 
 func handleRequest() {
 
@@ -32,7 +36,7 @@ func handleRequest() {
 		//v1.POST("/products", catalog.CreateProduct)
 	}
 
-	router.Run(":8889")
+	router.Run(":8080")
 }
 
 func initLogger(f *os.File) {
@@ -61,6 +65,20 @@ func main() {
 	dbsession := catalog.ConnectDB(dbName, collectionName, logger)
 
 	logger.Infof("Successfully connected to database %s", dbName)
+
+	zipkinCollector, err := zipkintracer.NewHTTPCollector("http://0.0.0.0:9411/api/v1/spans")
+	if err != nil {
+		logger.Fatalf("unable to create Zipkin HTTP collector: %+v", err)
+	}
+	defer zipkinCollector.Close()
+
+	zipkinRecorder := zipkintracer.NewRecorder(zipkinCollector, false, "0.0.0.0:8080", "catalog")
+	zipkinTracer, err := zipkintracer.NewTracer(zipkinRecorder, zipkintracer.ClientServerSameSpan(true), zipkintracer.TraceID128Bit(true))
+	if err != nil {
+		logger.Fatalf("unable to create Zipkin tracer: %+v", err)
+	}
+
+	stdopentracing.SetGlobalTracer(zipkinTracer)
 
 	handleRequest()
 
