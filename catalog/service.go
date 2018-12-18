@@ -60,13 +60,22 @@ func GetProduct(c *gin.Context) {
 		log.String("ProductID", productID),
 	)
 
-	error := collection.FindId(bson.ObjectIdHex(productID)).One(&product)
+	if bson.IsObjectIdHex(productID) {
+		error := collection.FindId(bson.ObjectIdHex(productID)).One(&product)
 
-	if error != nil {
-		message := "Product " + error.Error()
+		if error != nil {
+			message := "Product " + error.Error()
+			ext.Error.Set(span, true) // Tag the span as errored
+			span.LogEventWithPayload("GET product error", message)
+			c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
+			return
+		}
+
+	} else {
+		message := "Incorrect Format for ProductID"
 		ext.Error.Set(span, true) // Tag the span as errored
-		span.LogEventWithPayload("GET product error", message)
-		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
+		span.LogEventWithPayload("Incorrect Format for ProductID", message)
+		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "message": message})
 		return
 	}
 
