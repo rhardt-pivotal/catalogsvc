@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ishrivatsa/catalogservice/catalog"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	zipkintracer "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/sirupsen/logrus"
@@ -31,9 +30,9 @@ func handleRequest() {
 
 	v1 := router.Group("/")
 	{
-		v1.GET("/products", catalog.GetProducts)
-		v1.GET("/products/:id", catalog.GetProduct)
-		//v1.POST("/products", catalog.CreateProduct)
+		v1.GET("/products", GetProducts)
+		v1.GET("/products/:id", GetProduct)
+		//v1.POST("/products", CreateProduct)
 	}
 
 	router.Run(":8080")
@@ -62,7 +61,7 @@ func main() {
 		initLogger(f)
 	}
 
-	dbsession := catalog.ConnectDB(dbName, collectionName, logger)
+	dbsession := ConnectDB(dbName, collectionName, logger)
 
 	logger.Infof("Successfully connected to database %s", dbName)
 
@@ -82,7 +81,7 @@ func main() {
 
 	handleRequest()
 
-	catalog.CloseDB(dbsession, logger)
+	CloseDB(dbsession, logger)
 
 	// defer to close
 	defer f.Close()
