@@ -1,4 +1,4 @@
-module github.com/ishrivatsa/catalogsvc
+module github.com/vmwarecloudadvocacy/catalogsvc
 
 require (
 	github.com/DataDog/zstd v1.3.5 // indirect
