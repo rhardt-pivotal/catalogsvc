@@ -6,7 +6,7 @@ These instructions will allow you to run catalog service
 
 ## Requirements
 
-Go (golang) : 1.11+
+Go (golang) : 1.11.2
 
 mongodb 
 
@@ -42,7 +42,7 @@ zipkin
 
 4. Build the go application from the root of the folder
 
-``` go build -o catalogsvc ```
+``` go build -o bin/catalog ```
 
 5. Run a mongodb docker container
 

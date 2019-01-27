@@ -44,7 +44,7 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 
 	collection = db.C(collectionName)
 
-	logger.Info("connected to database and the collection")
+	logger.Info("Connected to database and the collection")
 
 	return Session
 }

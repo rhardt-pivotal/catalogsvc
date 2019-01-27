@@ -22,6 +22,9 @@ const (
 	collectionName = "products"
 )
 
+// This handles initiation of "gin" router. It also defines routes to various APIs
+// Env variable CATALOG_PORT cshould be used to set IP and PORT.
+// For example: export CATALOG_PORT=:8080 will start the server on local IP on port :8080
 func handleRequest() {
 
 	router := gin.Default()
@@ -35,9 +38,10 @@ func handleRequest() {
 		//v1.POST("/products", CreateProduct)
 	}
 
-	router.Run(":8080")
+	router.Run(os.Getenv("CATALOG_PORT"))
 }
 
+// This initiates a new Logger and defines the format for logs
 func initLogger(f *os.File) {
 
 	logger = logrus.New()
@@ -46,11 +50,14 @@ func initLogger(f *os.File) {
 		PrettyPrint:     true,
 	})
 
-	//set output of logs to f
-	logger.SetOutput(f)
+	// Set output of logs to Stdout
+	// Change to f for redirecting to file
+	logger.SetOutput(os.Stdout)
 
 }
 
+// This is the main function. It creates a logger file, along with sessions to DB and
+// a collector for tracer
 func main() {
 
 	//create your file with desired read/write permissions
