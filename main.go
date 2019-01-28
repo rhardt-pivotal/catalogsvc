@@ -73,7 +73,7 @@ func handleRequest() {
 
 	ipPort := ip + ":" + port
 
-	logger.Info("Starting catalog service at " + ip + " on " + port)
+	logger.Infof("Starting user service at %s on %s", ip, port)
 
 	router.Run(ipPort)
 }

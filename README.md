@@ -8,14 +8,13 @@ These instructions will allow you to run catalog service
 
 Go (golang) : 1.11.2
 
-mongodb 
+mongodb as docker container
 
-zipkin
+zipkin as docker container (optional)
 
 ## Instructions
 
 1. Clone this repository 
-
 
 2. You will notice the following directory structure
 
@@ -58,18 +57,26 @@ zipkin
     
     ```sudo docker exec -it {mongodb_container_id} bash```
 
-8. Import the users file into the database 
+8. Import the products file into the database 
     
    ```mongoimport --db catalog --collection products --file products.json -u mongoadmin -p secret --authenticationDatabase=admin```
 
-9. Export CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
+9. Export CATALOG_IP/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
     
+    ```export CATALOG_IP=0.0.0.0```
     ```export CATALOG_PORT=:8087```
 
-10. Run the catalog service
+10. Also, export ENV variables related to the database
+
+    ```
+    export CATALOG_DB_USER=mongoadmin
+    export CATALOG_DB_SECRET=secret
+    export CATALOG_DB_IP=0.0.0.0
+    ```
+
+11. Run the catalog service
 
 ```./bin/catalog```
-
 
 
 ### Additional Info
