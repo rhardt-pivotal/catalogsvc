@@ -62,7 +62,12 @@ zipkin
     
    ```mongoimport --db catalog --collection products --file products.json -u mongoadmin -p secret --authenticationDatabase=admin```
 
-9. Run the catalog service
+9. Export CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
+    
+    ```export CATALOG_PORT=:8087```
+
+
+10. Run the catalog service
 
 ```./bin/catalog```
 
