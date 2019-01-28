@@ -38,6 +38,8 @@ func handleRequest() {
 		//v1.POST("/products", CreateProduct)
 	}
 
+	logger.Info("Starting server")
+
 	router.Run(os.Getenv("CATALOG_PORT"))
 }
 
