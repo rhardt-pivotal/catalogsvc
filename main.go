@@ -12,35 +12,26 @@ import (
 )
 
 var (
-	logger      *logrus.Logger
-	zip         = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
+	logger *logrus.Logger
+	zip    = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
+	//	port        = flag.String("port", os.Getenv("CATALOG_PORT"), "Port number on which the service should run")
+	//	ip          = flag.String("ip", os.Getenv("CATALOG_IP"), "Preferred IP address to run the service on")
 	serviceName = "catalog"
 )
 
 const (
-	dbName         = "catalog"
-	collectionName = "products"
+	dbName         = "acmefit"
+	collectionName = "catalog"
 )
 
-// This handles initiation of "gin" router. It also defines routes to various APIs
-// Env variable CATALOG_PORT cshould be used to set IP and PORT.
-// For example: export CATALOG_PORT=:8080 will start the server on local IP on port :8080
-func handleRequest() {
-
-	router := gin.Default()
-
-	router.Static("/static/images", "./images")
-
-	v1 := router.Group("/")
-	{
-		v1.GET("/products", GetProducts)
-		v1.GET("/products/:id", GetProduct)
-		//v1.POST("/products", CreateProduct)
+// GetEnv accepts the ENV as key and a default string
+// If the lookup returns false then it uses the default string else it leverages the value set in ENV variable
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
 	}
-
-	logger.Info("Starting server")
-
-	router.Run(os.Getenv("CATALOG_PORT"))
+	logger.Info("Setting default values for ENV variable " + key)
+	return fallback
 }
 
 // This initiates a new Logger and defines the format for logs
@@ -56,6 +47,35 @@ func initLogger(f *os.File) {
 	// Change to f for redirecting to file
 	logger.SetOutput(os.Stdout)
 
+}
+
+// This handles initiation of "gin" router. It also defines routes to various APIs
+// Env variable CATALOG_IP and CATALOG_PORT should be used to set IP and PORT.
+// For example: export CATALOG_PORT=8087 will start the server on local IP at 0.0.0.0:8087
+func handleRequest() {
+
+	router := gin.Default()
+
+	router.Static("/static/images", "./images")
+
+	v1 := router.Group("/")
+	{
+		v1.GET("/products", GetProducts)
+		v1.GET("/products/:id", GetProduct)
+		//v1.POST("/products", CreateProduct)
+	}
+
+	//flag.Parse()
+
+	// Set default values if ENV variables are not set
+	port := GetEnv("CATALOG_PORT", "8087")
+	ip := GetEnv("CATALOG_IP", "0.0.0.0")
+
+	ipPort := ip + ":" + port
+
+	logger.Info("Starting catalog service at " + ip + " on " + port)
+
+	router.Run(ipPort)
 }
 
 // This is the main function. It creates a logger file, along with sessions to DB and

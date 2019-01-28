@@ -66,7 +66,6 @@ zipkin
     
     ```export CATALOG_PORT=:8087```
 
-
 10. Run the catalog service
 
 ```./bin/catalog```
