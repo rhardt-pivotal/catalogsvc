@@ -12,8 +12,11 @@ RUN go build -o catalog .
 
 FROM alpine
 RUN mkdir app
+RUN mkdir app/images
 #Copy the executable uilt from the previous image
 COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/catalog /app
+COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/images /app/images
 WORKDIR /app
 EXPOSE 80
+EXPOSE 8082
 CMD ["./catalog"]
