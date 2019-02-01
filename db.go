@@ -18,15 +18,19 @@ var (
 	collection *mgo.Collection
 )
 
-const (
-	// MongoDBUrl is the default mongodb url that will be used to connect to the database.
-	MongoDBUrl = "mongodb://mongoadmin:secret@0.0.0.0:27017/?authSource=admin"
-)
-
 // ConnectDB accepts name of database and collection as a string
 func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo.Session {
 
-	Session, error := mgo.Dial(MongoDBUrl)
+	dbUsername := os.Getenv("CATALOG_DB_USERNAME")
+	dbSecret := os.Getenv("CATALOG_DB_SECRET")
+
+	// Get ENV variable or set to default value
+	dbIP := GetEnv("CATALOG_DB_ENDPOINT", "0.0.0.0")
+	dbPort := GetEnv("CATALOG_DB_PORT", "27017")
+
+	mongoDBUrl := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", dbUsername, dbSecret, dbIP, dbPort)
+
+	Session, error := mgo.Dial(mongoDBUrl)
 
 	if error != nil {
 		fmt.Printf(error.Error())
@@ -44,7 +48,7 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 
 	collection = db.C(collectionName)
 
-	logger.Info("connected to database and the collection")
+	logger.Info("Connected to database and the collection")
 
 	return Session
 }

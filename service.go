@@ -21,7 +21,7 @@ type Product struct {
 	Tags        []string      `json:"tag"`
 }
 
-// GetProducts returns a list of all products
+// GetProducts accepts context as input and returns JSON with all the products
 func GetProducts(c *gin.Context) {
 	var products []Product
 
@@ -46,7 +46,8 @@ func GetProducts(c *gin.Context) {
 
 }
 
-// GetProduct returns a single product based on id
+// GetProduct accepts a context as input along with a specific product ID and returns details about that product
+// If a product is not found, it returns 404 NOT FOUND
 func GetProduct(c *gin.Context) {
 	var product Product
 
@@ -60,6 +61,7 @@ func GetProduct(c *gin.Context) {
 		log.String("ProductID", productID),
 	)
 
+	// Check if the Product ID is formatted correctly. If not return an Error - Bad Request
 	if bson.IsObjectIdHex(productID) {
 		error := collection.FindId(bson.ObjectIdHex(productID)).One(&product)
 
