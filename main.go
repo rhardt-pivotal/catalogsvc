@@ -68,7 +68,7 @@ func handleRequest() {
 	//flag.Parse()
 
 	// Set default values if ENV variables are not set
-	port := GetEnv("CATALOG_PORT", "8087")
+	port := GetEnv("CATALOG_PORT", "8082")
 	ip := GetEnv("CATALOG_HOST", "0.0.0.0")
 
 	ipPort := ip + ":" + port
