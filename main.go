@@ -69,7 +69,7 @@ func handleRequest() {
 
 	// Set default values if ENV variables are not set
 	port := GetEnv("CATALOG_PORT", "8087")
-	ip := GetEnv("CATALOG_IP", "0.0.0.0")
+	ip := GetEnv("CATALOG_HOST", "0.0.0.0")
 
 	ipPort := ip + ":" + port
 

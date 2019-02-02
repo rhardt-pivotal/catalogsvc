@@ -61,17 +61,17 @@ zipkin as docker container (optional)
     
    ```mongoimport --db catalog --collection products --file products.json -u mongoadmin -p secret --authenticationDatabase=admin```
 
-9. Export CATALOG_IP/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
+9. Export CATALOG_HOST/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
     
-    ```export CATALOG_IP=0.0.0.0```
+    ```export CATALOG_HOST=0.0.0.0```
     ```export CATALOG_PORT=:8087```
 
 10. Also, export ENV variables related to the database
 
     ```
-    export CATALOG_DB_USER=mongoadmin
-    export CATALOG_DB_SECRET=secret
-    export CATALOG_DB_IP=0.0.0.0
+    export CATALOG_DB_USERNAME=mongoadmin
+    export CATALOG_DB_PASSWORD=secret
+    export CATALOG_DB_HOST=0.0.0.0
     ```
 
 11. Run the catalog service
