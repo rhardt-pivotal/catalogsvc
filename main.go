@@ -62,7 +62,7 @@ func handleRequest() {
 	{
 		v1.GET("/products", GetProducts)
 		v1.GET("/products/:id", GetProduct)
-		//v1.POST("/products", CreateProduct)
+		v1.POST("/products", CreateProduct)
 	}
 
 	//flag.Parse()

@@ -13,12 +13,15 @@ import (
 
 // Product struct
 type Product struct {
-	ID          bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Picture     string        `json:"imageUrl"`
-	Price       float32       `json:"price"`
-	Tags        []string      `json:"tag"`
+	ID               bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Name             string        `json:"name"`
+	ShortDescription string        `json:"shortDescription"`
+	Description      string        `json:"description"`
+	ImageURL1        string        `json:"imageUrl1"`
+	ImageURL2        string        `json:"imageUrl2"`
+	ImageURL3        string        `json:"imageUrl3"`
+	Price            float32       `json:"price"`
+	Tags             []string      `json:"tags"`
 }
 
 // GetProducts accepts context as input and returns JSON with all the products
