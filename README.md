@@ -19,21 +19,16 @@ zipkin as docker container (optional)
 2. You will notice the following directory structure
 
 ``` 
+├── catalog-db
+│   ├── Dockerfile
+│   ├── products.json
+│   └── seed.js
 ├── db.go
 ├── Dockerfile
 ├── go.mod
 ├── go.sum
 ├── images
-│   ├── bicycle_square.jpg
-│   ├── bottle_square.jpg
-│   ├── logo.png
-│   ├── logo_transparent.png
-│   ├── redpants_square.jpg
-│   ├── shoes_square.jpg
-│   ├── smartwatch_square.jpg
-│   ├── treadmill_square.jpg
-│   ├── weights_square.jpg
-│   └── yogamat_square.jpg
+├── log.info
 ├── main.go
 ├── README.md
 └── service.go
