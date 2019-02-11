@@ -48,8 +48,8 @@ zipkin as docker container (optional)
 
 6. Export CATALOG_HOST/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
     
-    ```export CATALOG_HOST=0.0.0.0
-       export CATALOG_PORT=8082```
+       export CATALOG_HOST=0.0.0.0
+       export CATALOG_PORT=8082
 
 7. Also, export ENV variables related to the database
 
