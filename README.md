@@ -166,6 +166,12 @@ zipkin as docker container (optional)
        "status": 200
      }
    
+  > Retrieve specific image
+  
+   **'/static/images/:imageName' methods=['GET']**
    
+   Expected response is the image
+      
+  
    
    
