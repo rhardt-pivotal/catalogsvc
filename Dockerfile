@@ -11,12 +11,16 @@ ENV CGO_ENABLED=0
 RUN go build -o catalog .
 
 FROM alpine
+RUN apk update && apk add mongodb
 RUN mkdir app
 RUN mkdir app/images
-#Copy the executable uilt from the previous image
+#Copy the executable from the previous image
 COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/catalog /app
 COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/images /app/images
+COPY entrypoint/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN ln -s usr/local/bin/docker-entrypoint.sh /app
 WORKDIR /app
 EXPOSE 80
 EXPOSE 8082
-CMD ["./catalog"]
+ENTRYPOINT ["docker-entrypoint.sh"]
