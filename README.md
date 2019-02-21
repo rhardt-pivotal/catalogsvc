@@ -25,10 +25,11 @@ zipkin as docker container (optional)
 │   └── seed.js
 ├── db.go
 ├── Dockerfile
+├── entrypoint
+│   └── docker-entrypoint.sh
 ├── go.mod
 ├── go.sum
 ├── images
-├── log.info
 ├── main.go
 ├── README.md
 └── service.go
