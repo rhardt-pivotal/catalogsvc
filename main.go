@@ -1,28 +1,50 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	opentracing "github.com/opentracing/opentracing-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	zipkintracer "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/sirupsen/logrus"
+	jaeger "github.com/uber/jaeger-client-go"
+	"github.com/uber/jaeger-client-go/config"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
 )
 
 var (
 	logger *logrus.Logger
-	zip    = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
-	//	port        = flag.String("port", os.Getenv("CATALOG_PORT"), "Port number on which the service should run")
-	//	ip          = flag.String("ip", os.Getenv("CATALOG_IP"), "Preferred IP address to run the service on")
-	serviceName = "catalog"
+	// zip    = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
+	// //	port        = flag.String("port", os.Getenv("CATALOG_PORT"), "Port number on which the service should run")
+	// //	ip          = flag.String("ip", os.Getenv("CATALOG_IP"), "Preferred IP address to run the service on")
+	// serviceName = "catalog"
 )
 
 const (
 	dbName         = "acmefit"
 	collectionName = "catalog"
 )
+
+func initJaeger(service string) (opentracing.Tracer, io.Closer) {
+	cfg := &jaegercfg.Configuration{
+		ServiceName: "acmeshop",
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+		Reporter: &jaegercfg.ReporterConfig{
+			LogSpans:          true,
+			CollectorEndpoint: "http://192.168.152.218:14268/api/traces",
+		},
+	}
+	tracer, closer, err := cfg.New(service, config.Logger(jaeger.StdLogger))
+	if err != nil {
+		panic(fmt.Sprintf("ERROR: cannot init Jaeger: %v\n", err))
+	}
+	return tracer, closer
+}
 
 // GetEnv accepts the ENV as key and a default string
 // If the lookup returns false then it uses the default string else it leverages the value set in ENV variable
@@ -94,23 +116,24 @@ func main() {
 
 	logger.Infof("Successfully connected to database %s", dbName)
 
-	zipkinCollector, err := zipkintracer.NewHTTPCollector("http://0.0.0.0:9411/api/v1/spans")
-	if err != nil {
-		logger.Fatalf("unable to create Zipkin HTTP collector: %+v", err)
-	}
-	defer zipkinCollector.Close()
+	// jLogger := jaegerlog.StdLogger
+	// jMetricsFactory := metrics.NullFactory
 
-	zipkinRecorder := zipkintracer.NewRecorder(zipkinCollector, false, "0.0.0.0:8080", "catalog")
-	zipkinTracer, err := zipkintracer.NewTracer(zipkinRecorder, zipkintracer.ClientServerSameSpan(true), zipkintracer.TraceID128Bit(true))
-	if err != nil {
-		logger.Fatalf("unable to create Zipkin tracer: %+v", err)
-	}
+	// // Initialize tracer with a logger and a metrics factory
+	// tracer, closer, err := cfg.NewTracer(
+	// 	jaegercfg.Logger(jLogger),
+	// 	jaegercfg.Metrics(jMetricsFactory),
+	// )
 
-	stdopentracing.SetGlobalTracer(zipkinTracer)
+	tracer, closer := initJaeger("acmeshop")
+
+	stdopentracing.SetGlobalTracer(tracer)
 
 	handleRequest()
 
 	CloseDB(dbsession, logger)
+
+	defer closer.Close()
 
 	// defer to close
 	defer f.Close()

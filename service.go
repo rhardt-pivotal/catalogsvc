@@ -28,23 +28,25 @@ type Product struct {
 func GetProducts(c *gin.Context) {
 	var products []Product
 
-	span, _ := stdopentracing.StartSpanFromContext(c, "get_products")
-	defer span.Finish()
+	tracer := stdopentracing.GlobalTracer()
+	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
 
-	span.LogFields(
-		log.String("event", "string-format"),
-	)
+	print("product span context")
+	println(productSpanCtx)
+
+	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
 
 	error := collection.Find(nil).All(&products)
 
 	if error != nil {
 		message := "Products " + error.Error()
-		ext.Error.Set(span, true) // Tag the span as errored
-		span.LogEventWithPayload("GET service error", message)
+		ext.Error.Set(productSpan, true) // Tag the span as errored
+		productSpan.LogEventWithPayload("GET service error", message)
 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
 		return
 	}
 
+	defer productSpan.Finish()
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": products})
 
 }
