@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/opentracing/opentracing-go/ext"
@@ -29,12 +30,16 @@ func GetProducts(c *gin.Context) {
 	var products []Product
 
 	tracer := stdopentracing.GlobalTracer()
+	println("printing header from golang ", c.Request.Header)
+
 	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
 
 	print("product span context")
-	println(productSpanCtx)
+	fmt.Println(productSpanCtx)
 
-	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
+	productSpan := tracer.StartSpan("db_get_products", stdopentracing.FollowsFrom(productSpanCtx))
+
+	// productSpan, _ := stdopentracing.StartSpanFromContext(c, "db_get_products_new")
 
 	error := collection.Find(nil).All(&products)
 
