@@ -32,6 +32,10 @@ func GetProducts(c *gin.Context) {
 	tracer := stdopentracing.GlobalTracer()
 	println("printing header from golang ", c.Request.Header)
 
+	for k, v := range c.Request.Header {
+		fmt.Println("Header field %q, Value %q\n", k, v)
+	}
+
 	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
 
 	print("product span context")
