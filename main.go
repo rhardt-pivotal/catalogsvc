@@ -28,15 +28,19 @@ const (
 )
 
 func initJaeger(service string) (opentracing.Tracer, io.Closer) {
+	tracerIP := GetEnv("TRACER_IP", "0.0.0.0")
+	tracerPort := GetEnv("TRACER_PORT", "14268")
+
+	logger.Infof("Created tracer at http://%s:%s/api/traces", tracerIP, tracerPort)
+
 	cfg := &jaegercfg.Configuration{
-		ServiceName: "acmeshop",
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans:          true,
-			CollectorEndpoint: "http://192.168.152.218:14268/api/traces",
+			CollectorEndpoint: "http://" + tracerIP + ":" + tracerPort + "/api/traces",
 		},
 	}
 	tracer, closer, err := cfg.New(service, config.Logger(jaeger.StdLogger))
@@ -116,16 +120,7 @@ func main() {
 
 	logger.Infof("Successfully connected to database %s", dbName)
 
-	// jLogger := jaegerlog.StdLogger
-	// jMetricsFactory := metrics.NullFactory
-
-	// // Initialize tracer with a logger and a metrics factory
-	// tracer, closer, err := cfg.NewTracer(
-	// 	jaegercfg.Logger(jLogger),
-	// 	jaegercfg.Metrics(jMetricsFactory),
-	// )
-
-	tracer, closer := initJaeger("acmeshop")
+	tracer, closer := initJaeger("catalog")
 
 	stdopentracing.SetGlobalTracer(tracer)
 
