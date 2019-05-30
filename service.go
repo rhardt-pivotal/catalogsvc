@@ -31,7 +31,7 @@ func GetProducts(c *gin.Context) {
 
 	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
 
-	productSpan := tracer.StartSpan("db_get_products", stdopentracing.FollowsFrom(productSpanCtx))
+	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
 	defer productSpan.Finish()
 
 	error := collection.Find(nil).All(&products)
@@ -61,7 +61,7 @@ func GetProduct(c *gin.Context) {
 
 	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
 
-	productSpan := tracer.StartSpan("db_get_product", stdopentracing.FollowsFrom(productSpanCtx))
+	productSpan := tracer.StartSpan("db_get_product", stdopentracing.ChildOf(productSpanCtx))
 	defer productSpan.Finish()
 
 	productID := c.Param("id")
