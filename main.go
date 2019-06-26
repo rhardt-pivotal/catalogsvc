@@ -28,13 +28,15 @@ const (
 )
 
 func initJaeger(service string) (opentracing.Tracer, io.Closer) {
-	tracerIP := GetEnv("TRACER_HOST", "localhost")
-	tracerPort := GetEnv("TRACER_PORT", "14268")
+	
+	// Uncomment the lines below only if sending traces directly to the collector
+	// tracerIP := GetEnv("TRACER_HOST", "localhost")
+	// tracerPort := GetEnv("TRACER_PORT", "14268")
 
 	agentIP := GetEnv("JAEGER_AGENT_HOST", "localhost")
 	agentPort := GetEnv("JAEGER_AGENT_PORT", "6831")
 
-	logger.Infof("Created tracer at http://%s:%s/api/traces", tracerIP, tracerPort)
+	logger.Infof("Sending Traces to %s %s", tracerIP, tracerPort)
 
 	cfg := &jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
@@ -43,7 +45,8 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans:          true,
-                        LocalAgentHostPort: agentIP + ":" + agentPort,
+			LocalAgentHostPort: agentIP + ":" + agentPort,
+// Uncomment the lines below only if sending traces directly to the collector
 //			CollectorEndpoint: "http://" + tracerIP + ":" + tracerPort + "/api/traces",
 		},
 	}
