@@ -10,8 +10,8 @@ ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 RUN go build -o catalog .
 
-FROM alpine
-RUN apk update && apk add mongodb
+FROM bitnami/minideb:stretch
+RUN install_packages mongodb-clients
 RUN mkdir app
 RUN mkdir app/images
 #Copy the executable from the previous image
