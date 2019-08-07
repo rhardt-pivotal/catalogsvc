@@ -47,10 +47,11 @@ zipkin as docker container (optional)
 
    ```sudo docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -e MONGO_INITDB_DATABASE=acmefit gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db```
 
-6. Export CATALOG_HOST/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
+6. Export CATALOG_HOST/CATALOG_PORT/CATALOG_VERSION (port, ip, and version number) as ENV variable. You may choose any used port as per your environment setup. The version number must start with the letter *v*
     
        export CATALOG_HOST=0.0.0.0
        export CATALOG_PORT=8082
+       export CATALOG_VERSION=v1
 
 7. Also, export ENV variables related to the database
 
@@ -173,6 +174,16 @@ zipkin as docker container (optional)
    
    Expected response is the image
       
-  
+   **'/liveness' methods=['GET']**
+   
+      Expected JSON Response
+      
+      {
+       "data": {
+           "version": "v1",
+           "servicename": "catalog",
+         },
+       "status": 200
+     }
    
    
