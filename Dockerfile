@@ -10,7 +10,7 @@ ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 RUN go build -o catalog .
 
-FROM alpine
+FROM alpine:3.9
 RUN apk update && apk add mongodb
 RUN mkdir app
 RUN mkdir app/images
