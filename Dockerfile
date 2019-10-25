@@ -12,6 +12,7 @@ RUN go build -o catalog .
 
 FROM bitnami/minideb:stretch
 RUN install_packages mongodb-clients
+
 RUN mkdir app
 RUN mkdir app/images
 #Copy the executable from the previous image
@@ -21,6 +22,5 @@ COPY entrypoint/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN ln -s usr/local/bin/docker-entrypoint.sh /app
 WORKDIR /app
-EXPOSE 80
 EXPOSE 8082
 ENTRYPOINT ["docker-entrypoint.sh"]
