@@ -23,6 +23,24 @@ type Product struct {
 	Tags             []string      `json:"tags"`
 }
 
+// Liveness struct
+type Liveness struct {
+	Version     string `json:"version"`
+	ServiceName string `json:"servicename"`
+}
+
+// GetLiveness returns a JSON object with information about the service
+func GetLiveness(c *gin.Context) {
+	version := GetEnv("CATALOG_VERSION", "v1")
+
+	liveness := Liveness{
+		Version:     version,
+		ServiceName: serviceName,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": liveness})
+}
+
 // GetProducts accepts context as input and returns JSON with all the products
 func GetProducts(c *gin.Context) {
 	var products []Product

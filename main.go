@@ -93,6 +93,7 @@ func handleRequest() {
 
 	v1 := router.Group("/")
 	{
+		v1.GET("/liveness", GetLiveness)
 		v1.GET("/products", GetProducts)
 		v1.GET("/products/:id", GetProduct)
 		v1.POST("/products", CreateProduct)
