@@ -3,8 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/opentracing/opentracing-go/ext"
-	"github.com/opentracing/opentracing-go/log"
+	tracelog "github.com/opentracing/opentracing-go/log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
@@ -46,23 +45,27 @@ func GetLiveness(c *gin.Context) {
 func GetProducts(c *gin.Context) {
 	var products []Product
 
-	span, _ := stdopentracing.StartSpanFromContext(c, "get_products")
-	defer span.Finish()
+	tracer := stdopentracing.GlobalTracer()
 
-	span.LogFields(
-		log.String("event", "string-format"),
-	)
+	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
+
+	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
+	defer productSpan.Finish()
 
 	error := collection.Find(nil).All(&products)
 
 	if error != nil {
 		message := "Products " + error.Error()
-		ext.Error.Set(span, true) // Tag the span as errored
-		span.LogEventWithPayload("GET service error", message)
+		productSpan.LogFields(
+			tracelog.String("event", "error"),
+			tracelog.String("message", error.Error()),
+		)
+		productSpan.SetTag("http.status_code", http.StatusNotFound)
 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
 		return
 	}
 
+	productSpan.SetTag("http.status_code", http.StatusOK)
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": products})
 
 }
@@ -72,14 +75,18 @@ func GetProducts(c *gin.Context) {
 func GetProduct(c *gin.Context) {
 	var product Product
 
-	span, _ := stdopentracing.StartSpanFromContext(c, "get_product")
-	defer span.Finish()
+	tracer := stdopentracing.GlobalTracer()
+
+	productSpanCtx, _ := tracer.Extract(stdopentracing.HTTPHeaders, stdopentracing.HTTPHeadersCarrier(c.Request.Header))
+
+	productSpan := tracer.StartSpan("db_get_product", stdopentracing.ChildOf(productSpanCtx))
+	defer productSpan.Finish()
 
 	productID := c.Param("id")
 
-	span.LogFields(
-		log.String("event", "string-format"),
-		log.String("ProductID", productID),
+	productSpan.LogFields(
+		tracelog.String("event", "string-format"),
+		tracelog.String("product.id", productID),
 	)
 
 	// Check if the Product ID is formatted correctly. If not return an Error - Bad Request
@@ -88,20 +95,27 @@ func GetProduct(c *gin.Context) {
 
 		if error != nil {
 			message := "Product " + error.Error()
-			ext.Error.Set(span, true) // Tag the span as errored
-			span.LogEventWithPayload("GET product error", message)
+			productSpan.LogFields(
+				tracelog.String("event", "error"),
+				tracelog.String("message", error.Error()),
+			)
+			productSpan.SetTag("http.status_code", http.StatusNotFound)
 			c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
 			return
 		}
 
 	} else {
 		message := "Incorrect Format for ProductID"
-		ext.Error.Set(span, true) // Tag the span as errored
-		span.LogEventWithPayload("Incorrect Format for ProductID", message)
+		productSpan.LogFields(
+			tracelog.String("event", "error"),
+			tracelog.String("message", message),
+		)
+		productSpan.SetTag("http.status_code", http.StatusNotFound)
 		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "message": message})
 		return
 	}
 
+	productSpan.SetTag("http.status_code", http.StatusOK)
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": product})
 
 }
