@@ -30,7 +30,7 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 	agentIP := db.GetEnv("JAEGER_AGENT_HOST", "localhost")
 	agentPort := db.GetEnv("JAEGER_AGENT_PORT", "6831")
 
-	logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
+	logger.Logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
 
 	cfg := &jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
@@ -88,12 +88,12 @@ func main() {
 	if err != nil {
 		fmt.Println("Could not open file ", err)
 	} else {
-		logger.initLogger(f)
+		logger.InitLogger(f)
 	}
 
-	dbsession := db.ConnectDB(dbName, collectionName, logger.Logger)
+	dbsession := db.ConnectDB(dbName, collectionName)
 
-	logger.Infof("Successfully connected to database %s", dbName)
+	logger.Logger.Infof("Successfully connected to database %s", dbName)
 
 	tracer, closer := initJaeger("catalog")
 
@@ -101,7 +101,7 @@ func main() {
 
 	handleRequest()
 
-	db.CloseDB(dbsession, logger.Logger)
+	db.CloseDB(dbsession)
 
 	defer closer.Close()
 
