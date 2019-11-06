@@ -1,4 +1,4 @@
-# catalogsvc
+# Catalog Service
 
 ## Getting Started
 
@@ -19,64 +19,171 @@ zipkin as docker container (optional)
 2. You will notice the following directory structure
 
 ``` 
+├── catalog-db
+│   ├── Dockerfile
+│   ├── products.json
+│   └── seed.js
 ├── db.go
+├── Dockerfile
+├── entrypoint
+│   └── docker-entrypoint.sh
 ├── go.mod
 ├── go.sum
 ├── images
-│   ├── catsocks_1.jpg
-│   ├── cross_1.jpeg
-│   ├── product2.jpg
-│   ├── puma_1.jpeg
-│   ├── slide1.jpg
-│   ├── weave1.jpg
-│   └── youtube_1.jpeg
 ├── main.go
-├── products.json
 ├── README.md
 └── service.go
 
 ```
 
 3. Set GOPATH appropriately as per the documentation - https://github.com/golang/go/wiki/SettingGOPATH
+   Also, run ``` export GO111MODULE=on ```
 
 4. Build the go application from the root of the folder
 
-``` go build -o bin/catalog ```
+   ``` go build -o bin/catalog ```
 
 5. Run a mongodb docker container
 
-```sudo docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo```
+   ```sudo docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -e MONGO_INITDB_DATABASE=acmefit gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db```
 
-6. Execute this command to import the ```products.json``` file 
-
-   ```sudo docker cp products.json {mongodb_container_id}:/```
-
-
-7. **Login into the mongodb container**
-
+6. Export CATALOG_HOST/CATALOG_PORT/CATALOG_VERSION (port, ip, and version number) as ENV variable. You may choose any used port as per your environment setup. The version number must start with the letter *v*
     
-    ```sudo docker exec -it {mongodb_container_id} bash```
+       export CATALOG_HOST=0.0.0.0
+       export CATALOG_PORT=8082
+       export CATALOG_VERSION=v1
 
-8. Import the products file into the database 
-    
-   ```mongoimport --db catalog --collection products --file products.json -u mongoadmin -p secret --authenticationDatabase=admin```
-
-9. Export CATALOG_IP/CATALOG_PORT (port and ip) as ENV variable. You may choose any used port as per your environment setup.
-    
-    ```export CATALOG_IP=0.0.0.0```
-    ```export CATALOG_PORT=:8087```
-
-10. Also, export ENV variables related to the database
+7. Also, export ENV variables related to the database
 
     ```
-    export CATALOG_DB_USER=mongoadmin
-    export CATALOG_DB_SECRET=secret
-    export CATALOG_DB_IP=0.0.0.0
+    export CATALOG_DB_USERNAME=mongoadmin
+    export CATALOG_DB_PASSWORD=secret
+    export CATALOG_DB_HOST=0.0.0.0
     ```
 
-11. Run the catalog service
+8. Run the catalog service
 
-```./bin/catalog```
+   ```./bin/catalog```
 
 
-### Additional Info
+## API
+
+> **Returns list of all catalog items or creates a new product item (POST)**
+   
+   **'/products' methods=['GET', 'POST']**
+   
+      For 'GET' Method
+      
+      Expected JSON Response
+   
+      {
+         "data": [
+         {
+            "id": "5c61f497e5fdadefe84ff9b9",
+            "name": "Yoga Mat",
+            "shortDescription": "Limited Edition Mat",
+            "description": "Limited edition yoga mat",
+            "imageUrl1": "/static/images/yogamat_square.jpg",
+            "imageUrl2": "/static/images/yogamat_thumb2.jpg",
+            "imageUrl3": "/static/images/yogamat_thumb3.jpg",
+            "price": 62.5,
+            "tags": [
+                "mat"
+            ]
+          },
+          {
+            "id": "5c61f497e5fdadefe84ff9ba",
+            "name": "Water Bottle",
+            "shortDescription": "Best water bottle ever",
+            "description": "For all those athletes out there, a perfect bottle to enrich you",
+            "imageUrl1": "/static/images/bottle_square.jpg",
+            "imageUrl2": "/static/images/bottle_thumb2.jpg",
+            "imageUrl3": "/static/images/bottle_thumb3.jpg",
+            "price": 34.99,
+            "tags": [
+                "bottle"
+               ]
+          }
+         ]}
+         
+         For 'POST' Method
+         
+         Expected JSON Body with Request - The image(s) should be placed under the images directory as shown above in the tree          structure
+         
+         {
+            "name": "Tracker",
+            "shortDescription": "Limited Edition Tracker",
+            "description": "Limited edition Tracker with longer description",
+            "imageurl1": "/static/images/tracker_square.jpg",
+            "imageurl2": "/static/images/tracker_thumb2.jpg",
+            "imageurl3": "/static/images/tracker_thumb3.jpg",
+            "price": 149.99,
+            "tags": [
+                "tracker"
+             ]
+
+          }
+          
+          Expected JSON Response 
+          
+          {
+                "message": "Product created successfully!",
+                "resourceId": {
+                    "id": "5c61f8f81d41c8e94ecaf25f",
+                    "name": "Tracker",
+                    "shortDescription": "Limited Edition Tracker",
+                    "description": "Limited edition Tracker with longer description",
+                    "imageUrl1": "/static/images/tracker_square.jpg",
+                    "imageUrl2": "/static/images/tracker_thumb2.jpg",
+                    "imageUrl3": "/static/images/tracker_thumb3.jpg",
+                    "price": 149.99,
+                    "tags": [
+                        "tracker"
+                    ]
+                },
+                "status": 201
+           }
+   
+   
+> **Returns details about a specific product id**
+
+   **'/products/:id' methods=['GET']**
+   
+      Expected JSON Response
+      
+      {
+       "data": {
+           "id": "5c61f497e5fdadefe84ff9b9",
+           "name": "Yoga Mat",
+           "shortDescription": "Limited Edition Mat",
+           "description": "Limited edition yoga mat",
+           "imageUrl1": "/static/images/yogamat_square.jpg",
+           "imageUrl2": "/static/images/yogamat_square.jpg",
+           "imageUrl3": "/static/images/bottle_square.jpg",
+           "price": 62.5,
+           "tags": [
+             "mat"
+           ]
+         },
+       "status": 200
+     }
+   
+  > Retrieve specific image
+  
+   **'/static/images/:imageName' methods=['GET']**
+   
+   Expected response is the image
+      
+   **'/liveness' methods=['GET']**
+   
+      Expected JSON Response
+      
+      {
+       "data": {
+           "version": "v1",
+           "servicename": "catalog",
+         },
+       "status": 200
+     }
+   
+   
