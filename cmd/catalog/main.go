@@ -8,18 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	opentracing "github.com/opentracing/opentracing-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"github.com/sirupsen/logrus"
 	jaeger "github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
-)
-
-var (
-	logger *logrus.Logger
-	// zip    = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
-	// //	port        = flag.String("port", os.Getenv("CATALOG_PORT"), "Port number on which the service should run")
-	// //	ip          = flag.String("ip", os.Getenv("CATALOG_IP"), "Preferred IP address to run the service on")
-	// serviceName = "catalog"
+	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/service"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
 )
 
 const (
@@ -33,10 +27,10 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 	// tracerIP := GetEnv("TRACER_HOST", "localhost")
 	// tracerPort := GetEnv("TRACER_PORT", "14268")
 
-	agentIP := GetEnv("JAEGER_AGENT_HOST", "localhost")
-	agentPort := GetEnv("JAEGER_AGENT_PORT", "6831")
+	agentIP := db.GetEnv("JAEGER_AGENT_HOST", "localhost")
+	agentPort := db.GetEnv("JAEGER_AGENT_PORT", "6831")
 
-	logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
+	logger.Logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
 
 	cfg := &jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
@@ -57,31 +51,6 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 	return tracer, closer
 }
 
-// GetEnv accepts the ENV as key and a default string
-// If the lookup returns false then it uses the default string else it leverages the value set in ENV variable
-func GetEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	logger.Info("Setting default values for ENV variable " + key)
-	return fallback
-}
-
-// This initiates a new Logger and defines the format for logs
-func initLogger(f *os.File) {
-
-	logger = logrus.New()
-	logger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: "",
-		PrettyPrint:     true,
-	})
-
-	// Set output of logs to Stdout
-	// Change to f for redirecting to file
-	logger.SetOutput(os.Stdout)
-
-}
-
 // This handles initiation of "gin" router. It also defines routes to various APIs
 // Env variable CATALOG_IP and CATALOG_PORT should be used to set IP and PORT.
 // For example: export CATALOG_PORT=8087 will start the server on local IP at 0.0.0.0:8087
@@ -89,25 +58,23 @@ func handleRequest() {
 
 	router := gin.Default()
 
-	router.Static("/static/images", "./images")
+	router.Static("/static/images", "./web")
 
 	v1 := router.Group("/")
 	{
-		v1.GET("/liveness", GetLiveness)
-		v1.GET("/products", GetProducts)
-		v1.GET("/products/:id", GetProduct)
-		v1.POST("/products", CreateProduct)
+		v1.GET("/liveness", service.GetLiveness)
+		v1.GET("/products", service.GetProducts)
+		v1.GET("/products/:id", service.GetProduct)
+		v1.POST("/products", service.CreateProduct)
 	}
 
-	//flag.Parse()
-
 	// Set default values if ENV variables are not set
-	port := GetEnv("CATALOG_PORT", "8082")
-	ip := GetEnv("CATALOG_HOST", "0.0.0.0")
+	port := db.GetEnv("CATALOG_PORT", "8082")
+	ip := db.GetEnv("CATALOG_HOST", "0.0.0.0")
 
 	ipPort := ip + ":" + port
 
-	logger.Infof("Starting catalog service at %s on %s", ip, port)
+	logger.Logger.Infof("Starting catalog service at %s on %s", ip, port)
 
 	router.Run(ipPort)
 }
@@ -121,12 +88,12 @@ func main() {
 	if err != nil {
 		fmt.Println("Could not open file ", err)
 	} else {
-		initLogger(f)
+		logger.InitLogger(f)
 	}
 
-	dbsession := ConnectDB(dbName, collectionName, logger)
+	dbsession := db.ConnectDB(dbName, collectionName)
 
-	logger.Infof("Successfully connected to database %s", dbName)
+	logger.Logger.Infof("Successfully connected to database %s", dbName)
 
 	tracer, closer := initJaeger("catalog")
 
@@ -134,7 +101,7 @@ func main() {
 
 	handleRequest()
 
-	CloseDB(dbsession, logger)
+	db.CloseDB(dbsession)
 
 	defer closer.Close()
 
