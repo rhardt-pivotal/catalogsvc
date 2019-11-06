@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/sirupsen/logrus"
+	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 )
 
 var (
@@ -15,8 +16,18 @@ var (
 
 	db *mgo.Database
 
-	collection *mgo.Collection
+	Collection *mgo.Collection
 )
+
+// GetEnv accepts the ENV as key and a default string
+// If the lookup returns false then it uses the default string else it leverages the value set in ENV variable
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	logger.Logger.Info("Setting default values for ENV variable " + key)
+	return fallback
+}
 
 // ConnectDB accepts name of database and collection as a string
 func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo.Session {
@@ -34,7 +45,7 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 
 	if error != nil {
 		fmt.Printf(error.Error())
-		logger.Fatalf(error.Error())
+		logger.Logger.Fatalf(error.Error())
 		os.Exit(1)
 
 	}
@@ -43,12 +54,12 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 
 	error = db.Session.Ping()
 	if error != nil {
-		logger.Errorf("Unable to connect to database %s", dbName)
+		logger.Logger.Errorf("Unable to connect to database %s", dbName)
 	}
 
-	collection = db.C(collectionName)
+	Collection = db.C(collectionName)
 
-	logger.Info("Connected to database and the collection")
+	logger.Logger.Info("Connected to database and the collection")
 
 	return Session
 }
@@ -57,5 +68,5 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 func CloseDB(s *mgo.Session, logger *logrus.Logger) {
 
 	defer s.Close()
-	logger.Info("Closed connection to db")
+	logger.Logger.Info("Closed connection to db")
 }

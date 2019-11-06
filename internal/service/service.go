@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"net/http"
@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	stdopentracing "github.com/opentracing/opentracing-go"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
+	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 )
 
 // Product struct
@@ -31,11 +33,11 @@ type Liveness struct {
 
 // GetLiveness returns a JSON object with information about the service
 func GetLiveness(c *gin.Context) {
-	version := GetEnv("CATALOG_VERSION", "v1")
+	version := db.GetEnv("CATALOG_VERSION", "v1")
 
 	liveness := Liveness{
 		Version:     version,
-		ServiceName: serviceName,
+		ServiceName: logger.ServiceName,
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": liveness})
@@ -52,7 +54,7 @@ func GetProducts(c *gin.Context) {
 	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
 	defer productSpan.Finish()
 
-	error := collection.Find(nil).All(&products)
+	error := db.Collection.Find(nil).All(&products)
 
 	if error != nil {
 		message := "Products " + error.Error()
@@ -91,7 +93,7 @@ func GetProduct(c *gin.Context) {
 
 	// Check if the Product ID is formatted correctly. If not return an Error - Bad Request
 	if bson.IsObjectIdHex(productID) {
-		error := collection.FindId(bson.ObjectIdHex(productID)).One(&product)
+		error := db.Collection.FindId(bson.ObjectIdHex(productID)).One(&product)
 
 		if error != nil {
 			message := "Product " + error.Error()
@@ -133,7 +135,7 @@ func CreateProduct(c *gin.Context) {
 
 	product.ID = bson.NewObjectId()
 
-	error = collection.Insert(&product)
+	error = db.Collection.Insert(&product)
 
 	if error != nil {
 		message := "Product " + error.Error()
