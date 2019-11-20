@@ -53,6 +53,8 @@ The **catalog** service, either running inside a Docker container or as a stand-
 * **CATALOG_DB_USERNAME**: The username to connect to the MongoDB database
 * **CATALOG_DB_PASSWORD**: The password to connect to the MongoDB database
 * **CATALOG_DB_HOST**: The host or IP on which MongoDB is active
+* **USERS_HOST**: The host or IP on which the auth/user service is active
+* **USERS_PORT**: The port number on which the auth/user service listens to.
 
 The Docker image is based on the Bitnami MiniDeb container. Use this commands to run the latest stable version of the payment service with all available parameters:
 
@@ -61,7 +63,7 @@ The Docker image is based on the Bitnami MiniDeb container. Use this commands to
 docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -e MONGO_INITDB_DATABASE=acmefit gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db
 
 # Run the user service
-docker run --rm -it -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -p 8082:8082 gcr.io/vmwarecloudadvocacy/amceshop-catalog:1.1.1-beta
+docker run --rm -itd -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -p 8082:8082 gcr.io/vmwarecloudadvocacy/amceshop-catalog:1.1.1-beta
 ```
 
 ## API
