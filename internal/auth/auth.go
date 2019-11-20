@@ -71,7 +71,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		response, err := http.Post(authSvcURL, "application/json", bytes.NewBuffer(requestBody))
 
 		if err != nil {
-			logger.Logger.Fatalf(err.Error())
+			logger.Logger.Errorf(err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "message": "Incorrect Format of Authorization Token "})
 			c.Abort()
 			return
@@ -84,7 +84,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		logger.Logger.Infof("User verification status ", response.StatusCode)
+		logger.Logger.Infof("User verification status - %s", response.Status)
 		c.Next()
 
 	}
