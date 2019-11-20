@@ -14,6 +14,7 @@ import (
 	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 	"github.com/vmwarecloudadvocacy/catalogsvc/internal/service"
 	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/auth"
 )
 
 const (
@@ -32,7 +33,7 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 
 	logger.Logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
 
-	cfg := &jaegercfg.Configuration{
+	cfg  := &jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: 1,
@@ -60,12 +61,18 @@ func handleRequest() {
 
 	router.Static("/static/images", "./web")
 
-	v1 := router.Group("/")
+	nonAuthGroup := router.Group("/")
 	{
-		v1.GET("/liveness", service.GetLiveness)
-		v1.GET("/products", service.GetProducts)
-		v1.GET("/products/:id", service.GetProduct)
-		v1.POST("/products", service.CreateProduct)
+		nonAuthGroup.GET("/liveness", service.GetLiveness)
+	}
+
+	authGroup := router.Group("/")
+
+	authGroup.Use(auth.AuthMiddleware())
+	{
+		authGroup.GET("/products", service.GetProducts)
+		authGroup.GET("/products/:id", service.GetProduct)
+		authGroup.POST("/products", service.CreateProduct)
 	}
 
 	// Set default values if ENV variables are not set
