@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/globalsign/mgo"
-	"github.com/sirupsen/logrus"
 	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 )
 
@@ -17,6 +16,7 @@ var (
 	db *mgo.Database
 
 	Collection *mgo.Collection
+
 )
 
 // GetEnv accepts the ENV as key and a default string
@@ -30,7 +30,7 @@ func GetEnv(key, fallback string) string {
 }
 
 // ConnectDB accepts name of database and collection as a string
-func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo.Session {
+func ConnectDB(dbName string, collectionName string) *mgo.Session {
 
 	dbUsername := os.Getenv("CATALOG_DB_USERNAME")
 	dbSecret := os.Getenv("CATALOG_DB_PASSWORD")
@@ -65,7 +65,7 @@ func ConnectDB(dbName string, collectionName string, logger *logrus.Logger) *mgo
 }
 
 // CloseDB accepst Session as input to close Connection to the database
-func CloseDB(s *mgo.Session, logger *logrus.Logger) {
+func CloseDB(s *mgo.Session) {
 
 	defer s.Close()
 	logger.Logger.Info("Closed connection to db")
