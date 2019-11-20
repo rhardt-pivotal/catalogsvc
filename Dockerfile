@@ -8,16 +8,16 @@ COPY . $GOPATH/src/github.com/vmwarecloudadvocacy/catalogsvc
 WORKDIR $GOPATH/src/github.com/vmwarecloudadvocacy/catalogsvc
 ENV GO111MODULE=on
 ENV CGO_ENABLED=0
-RUN go build -o catalog .
+RUN go build -o bin/catalog ./cmd/catalog
 
 FROM bitnami/minideb:stretch
 RUN install_packages mongodb-clients
 
 RUN mkdir app
-RUN mkdir app/images
+RUN mkdir app/web
 #Copy the executable from the previous image
-COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/catalog /app
-COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/images /app/images
+COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/bin/catalog /app
+COPY --from=builder /go/src/github.com/vmwarecloudadvocacy/catalogsvc/web /app/web
 COPY entrypoint/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN ln -s usr/local/bin/docker-entrypoint.sh /app
