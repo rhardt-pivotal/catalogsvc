@@ -19,7 +19,6 @@ There are different dependencies based on whether you want to run a built contai
 
 * [Docker](https://www.docker.com/docker-community)
 * [MongoDB](https://hub.docker.com/r/bitnami/mongodb)
-* [Zipkin](https://hub.docker.com/r/openzipkin/zipkin)
 
 ## Installation
 
