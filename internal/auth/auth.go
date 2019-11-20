@@ -72,7 +72,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err != nil {
 			logger.Logger.Errorf(err.Error())
-			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "message": "Incorrect Format of Authorization Token "})
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "message": err.Error()})
 			c.Abort()
 			return
 		}
