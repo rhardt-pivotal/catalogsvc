@@ -1,6 +1,6 @@
 # Catalog
 
-[![gcr.io](https://img.shields.io/badge/gcr.io-v1.1.1--beta-orange?style=flat-square)](https://console.cloud.google.com/gcr/images/vmwarecloudadvocacy/GLOBAL/amceshop-catalog@sha256:de12574a7e9d62fe9e3f466a6687d78428f50c5143b49b7485947101858c2ae3/details?tab=info)
+[![gcr.io](https://img.shields.io/badge/gcr.io-v1.2.0-orange?style=flat-square)](https://console.cloud.google.com/gcr/images/vmwarecloudadvocacy/GLOBAL/amceshop-catalog@sha256:de12574a7e9d62fe9e3f466a6687d78428f50c5143b49b7485947101858c2ae3/details?tab=info)
 
 > A catalog service, because what is a shop without a catalog to show off our awesome red pants?
 
