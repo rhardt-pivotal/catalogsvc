@@ -11,10 +11,10 @@ import (
 	jaeger "github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
-	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
-	"github.com/vmwarecloudadvocacy/catalogsvc/internal/service"
-	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
 	"github.com/vmwarecloudadvocacy/catalogsvc/internal/auth"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
+	"github.com/vmwarecloudadvocacy/catalogsvc/internal/service"
+	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 )
 
 func initJaeger(service string) (opentracing.Tracer, io.Closer) {
-	
+
 	// Uncomment the lines below only if sending traces directly to the collector
 	// tracerIP := GetEnv("TRACER_HOST", "localhost")
 	// tracerPort := GetEnv("TRACER_PORT", "14268")
@@ -33,16 +33,16 @@ func initJaeger(service string) (opentracing.Tracer, io.Closer) {
 
 	logger.Logger.Infof("Sending Traces to %s %s", agentIP, agentPort)
 
-	cfg  := &jaegercfg.Configuration{
+	cfg := &jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:          true,
+			LogSpans:           true,
 			LocalAgentHostPort: agentIP + ":" + agentPort,
-// Uncomment the lines below only if sending traces directly to the collector
-//			CollectorEndpoint: "http://" + tracerIP + ":" + tracerPort + "/api/traces",
+			// Uncomment the lines below only if sending traces directly to the collector
+			//			CollectorEndpoint: "http://" + tracerIP + ":" + tracerPort + "/api/traces",
 		},
 	}
 	tracer, closer, err := cfg.New(service, config.Logger(jaeger.StdLogger))
@@ -64,14 +64,14 @@ func handleRequest() {
 	nonAuthGroup := router.Group("/")
 	{
 		nonAuthGroup.GET("/liveness", service.GetLiveness)
+		nonAuthGroup.GET("/products", service.GetProducts)
+		nonAuthGroup.GET("/products/:id", service.GetProduct)
 	}
 
 	authGroup := router.Group("/")
 
 	authGroup.Use(auth.AuthMiddleware())
 	{
-		authGroup.GET("/products", service.GetProducts)
-		authGroup.GET("/products/:id", service.GetProduct)
 		authGroup.POST("/products", service.CreateProduct)
 	}
 
