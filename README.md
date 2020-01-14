@@ -62,7 +62,7 @@ The Docker image is based on the Bitnami MiniDeb container. Use this commands to
 docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -e MONGO_INITDB_DATABASE=acmefit gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db
 
 # Run the user service
-docker run --rm -itd -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -p 8082:8082 gcr.io/vmwarecloudadvocacy/amceshop-catalog:1.1.1-beta
+docker run -d -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -e USERS_HOST=0.0.0.0 -e USERS_PORT=8083 -p 8082:8082 gcr.io/vmwarecloudadvocacy/acmeshop-catalog:1.2.0
 ```
 
 ## API
