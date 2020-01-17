@@ -1,15 +1,15 @@
 package auth
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
-	"encoding/json"
-	"bytes"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 	"github.com/vmwarecloudadvocacy/catalogsvc/internal/db"
+	"github.com/vmwarecloudadvocacy/catalogsvc/pkg/logger"
 )
 
 var (
@@ -18,12 +18,11 @@ var (
 	authServicePort string
 )
 
-
 // getAuthURL method creates the url string necessary to make the /verify-token request to the Auth(user) service
 func getAuthURL() string {
-	
+
 	authServiceHost = db.GetEnv("USERS_HOST", "user")
-	authServicePort = db.GetEnv("USERS_PORT", "8081")
+	authServicePort = db.GetEnv("USERS_PORT", "8083")
 	authURL := fmt.Sprintf("http://%s:%s/verify-token", authServiceHost, authServicePort)
 
 	logger.Logger.Infof("Returning Auth URL")
