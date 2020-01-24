@@ -1,6 +1,6 @@
 # Catalog
 
-[![gcr.io](https://img.shields.io/badge/gcr.io-v1.2.0-orange?style=flat-square)](https://console.cloud.google.com/gcr/images/vmwarecloudadvocacy/GLOBAL/amceshop-catalog@sha256:de12574a7e9d62fe9e3f466a6687d78428f50c5143b49b7485947101858c2ae3/details?tab=info)
+[![gcr.io](https://img.shields.io/badge/gcr.io-stable-green?style=flat-square)](https://console.cloud.google.com/gcr/images/vmwarecloudadvocacy/GLOBAL/amceshop-catalog@sha256:de12574a7e9d62fe9e3f466a6687d78428f50c5143b49b7485947101858c2ae3/details?tab=info)
 
 > A catalog service, because what is a shop without a catalog to show off our awesome red pants?
 
@@ -27,7 +27,7 @@ There are different dependencies based on whether you want to run a built contai
 Use this command to pull the latest tagged version of the shipping service:
 
 ```bash
-docker pull gcr.io/vmwarecloudadvocacy/amceshop-catalog:1.1.1-beta
+docker pull gcr.io/vmwarecloudadvocacy/amceshop-catalog:stable
 ```
 
 To build a docker container, run `docker build . -t vmwarecloudadvocacy/acmeshop-catalog:<tag>`.
@@ -54,6 +54,8 @@ The **catalog** service, either running inside a Docker container or as a stand-
 * **CATALOG_DB_HOST**: The host or IP on which MongoDB is active
 * **USERS_HOST**: The host or IP on which the auth/user service is active
 * **USERS_PORT**: The port number on which the auth/user service listens to.
+* **JAEGER_AGENT_HOST**: The host for Jaeger agent - Use this only if you want tracing enabled
+* **JAEGER_AGENT_PORT**: The port for Jaeger agent - Use this only if you want tracing enabled
 
 The Docker image is based on the Bitnami MiniDeb container. Use this commands to run the latest stable version of the payment service with all available parameters:
 
@@ -62,7 +64,7 @@ The Docker image is based on the Bitnami MiniDeb container. Use this commands to
 docker run -d -p 27017:27017 --name mgo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -e MONGO_INITDB_DATABASE=acmefit gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db
 
 # Run the user service
-docker run -d -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -e USERS_HOST=0.0.0.0 -e USERS_PORT=8083 -p 8082:8082 gcr.io/vmwarecloudadvocacy/acmeshop-catalog:1.2.0
+docker run -d -e CATALOG_HOST=0.0.0.0 -e CATALOG_PORT=8082 -e CATALOG_VERSION=v1 -e CATALOG_DB_USERNAME=mongoadmin -e CATALOG_DB_PASSWORD=secret -e CATALOG_DB_HOST=0.0.0.0 -e USERS_HOST=0.0.0.0 -e USERS_PORT=8083 -p 8082:8082 gcr.io/vmwarecloudadvocacy/acmeshop-catalog:stable
 ```
 
 ## API
@@ -118,6 +120,7 @@ Create a new product item
 curl --request POST \
   --url http://localhost:8082/products \
   --header 'content-type: application/json' \
+  --header 'Authorization: Bearer <TOKEN>' \
   --data '         {
             "name": "Tracker",
             "shortDescription": "Limited Edition Tracker",
