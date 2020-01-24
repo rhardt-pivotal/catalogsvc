@@ -10,8 +10,13 @@ ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 RUN go build -o bin/catalog ./cmd/catalog
 
+# Install mongo client 4.2
 FROM bitnami/minideb:stretch
-RUN install_packages mongodb-clients
+RUN apt-get update && apt-get install -y gnupg2
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
+RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+RUN apt update && apt -y upgrade
+RUN apt-get install -y mongodb-org
 
 RUN mkdir app
 RUN mkdir app/web
