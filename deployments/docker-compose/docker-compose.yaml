@@ -28,6 +28,6 @@ services:
              - CATALOG_DB_PORT=27017
              - CATALOG_VERSION=v1
              - USERS_HOST=0.0.0.0
-             - USERS_PORT=8081
+             - USERS_PORT=8083
         depends_on:
              - catalog-db
