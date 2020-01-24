@@ -13,7 +13,7 @@ services:
         - SETGID
         - SETUID
   catalog:
-        image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog:1.2
+        image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog:stable
         hostname: catalog
         restart: always
         ports:
@@ -29,5 +29,7 @@ services:
              - CATALOG_VERSION=v1
              - USERS_HOST=0.0.0.0
              - USERS_PORT=8083
+             - JAEGER_AGENT_HOST='localhost'
+             - JAEGER_AGENT_PORT=6831
         depends_on:
              - catalog-db
