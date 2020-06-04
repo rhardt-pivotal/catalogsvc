@@ -1,7 +1,11 @@
 package service
 
 import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"net/http"
+	"time"
 
 	tracelog "github.com/opentracing/opentracing-go/log"
 
@@ -14,14 +18,14 @@ import (
 
 // Product struct
 type Product struct {
-	ID               bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	ID               primitive.ObjectID `bson:"_id" json:"id"`
 	Name             string        `json:"name"`
 	ShortDescription string        `json:"shortDescription"`
 	Description      string        `json:"description"`
 	ImageURL1        string        `json:"imageUrl1"`
 	ImageURL2        string        `json:"imageUrl2"`
 	ImageURL3        string        `json:"imageUrl3"`
-	Price            float32       `json:"price"`
+	Price            float64       `json:"price"`
 	Tags             []string      `json:"tags"`
 }
 
@@ -45,7 +49,17 @@ func GetLiveness(c *gin.Context) {
 
 // GetProducts accepts context as input and returns JSON with all the products
 func GetProducts(c *gin.Context) {
-	var products []Product
+
+	ck := "nada"
+	if value := c.Request.Header.Get("cookie"); value != "" {
+		ck = value
+	}
+	log.Println("****GET PRODUCTS")
+	log.Println("****GOOOKIE: %v", ck)
+
+
+
+	var products []*Product
 
 	tracer := stdopentracing.GlobalTracer()
 
@@ -54,8 +68,10 @@ func GetProducts(c *gin.Context) {
 	productSpan := tracer.StartSpan("db_get_products", stdopentracing.ChildOf(productSpanCtx))
 	defer productSpan.Finish()
 
-	error := db.Collection.Find(nil).All(&products)
-
+	//error := db.Collection.Find(nil).All(&products)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	cur, error := db.Collection().Find(ctx, bson.M{})
+	//if err != nil { log.Fatal(err) }
 	if error != nil {
 		message := "Products " + error.Error()
 		productSpan.LogFields(
@@ -67,8 +83,27 @@ func GetProducts(c *gin.Context) {
 		return
 	}
 
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result Product
+		err := cur.Decode(&result)
+		if err != nil { log.Fatal(err) }
+		products = append(products, &result)
+	}
+	if err := cur.Err(); err != nil {
+		message := "Products " + error.Error()
+		productSpan.LogFields(
+			tracelog.String("event", "error"),
+			tracelog.String("message", error.Error()),
+		)
+		productSpan.SetTag("http.status_code", http.StatusNotFound)
+		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": message})
+		return
+	}
 	productSpan.SetTag("http.status_code", http.StatusOK)
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": products})
+
+
 
 }
 
@@ -85,15 +120,21 @@ func GetProduct(c *gin.Context) {
 	defer productSpan.Finish()
 
 	productID := c.Param("id")
+	objID, _ := primitive.ObjectIDFromHex(productID)
+	filter := bson.M{"_id": objID}
 
 	productSpan.LogFields(
 		tracelog.String("event", "string-format"),
 		tracelog.String("product.id", productID),
 	)
 
-	// Check if the Product ID is formatted correctly. If not return an Error - Bad Request
+
+
+	// Check if the Product ID is formatted correctly. If not return an Error - Bad Reques
 	if bson.IsObjectIdHex(productID) {
-		error := db.Collection.FindId(bson.ObjectIdHex(productID)).One(&product)
+		ctx := context.Background()
+		res := db.Collection().FindOne(ctx, filter)
+		error := res.Decode(&product)//FindId(bson.ObjectIdHex(productID)).One(&product)
 
 		if error != nil {
 			message := "Product " + error.Error()
@@ -133,9 +174,9 @@ func CreateProduct(c *gin.Context) {
 		return
 	}
 
-	product.ID = bson.NewObjectId()
 
-	error = db.Collection.Insert(&product)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	_, error = db.Collection().InsertOne(ctx, product)   //Insert(&product)
 
 	if error != nil {
 		message := "Product " + error.Error()

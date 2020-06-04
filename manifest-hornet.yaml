@@ -1,0 +1,13 @@
+---
+applications:
+- name: catserv-hornet
+  env:
+    GO_INSTALL_PACKAGE_SPEC: github.com/vmwarecloudadvocacy/catalogsvc/cmd/catalog
+    CATALOG_DB_USERNAME: mongoadmin
+    CATALOG_DB_PASSWORD: password
+    CATALOG_DB_HOST: catalog-mongo-hornet.mesh.internal.hardt.io
+    CATALOG_PORT: 8080
+    CATALOG_DB_PORT: 27017
+    CATALOG_VERSION: v1
+    USERS_HOST: users.mesh.internal.hardt.io
+    USERS_PORT: 8081

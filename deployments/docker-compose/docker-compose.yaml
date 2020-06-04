@@ -2,8 +2,10 @@ version: '3'
 
 services:
   catalog-db:
-       image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db:latest
+       image: rhardt/catdb:latest # gcr.io/vmwarecloudadvocacy/acmeshop-catalog-db:latest
        hostname: catalog-db
+       ports:
+        - '27017:27017'
        environment:
         - MONGO_INITDB_ROOT_USERNAME=mongoadmin
         - MONGO_INITDB_ROOT_PASSWORD=secret
@@ -13,7 +15,7 @@ services:
         - SETGID
         - SETUID
   catalog:
-        image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog:stable
+        image: rhardt/catserv:latest  #  gcr.io/vmwarecloudadvocacy/acmeshop-catalog:stable
         hostname: catalog
         restart: always
         ports:
@@ -29,7 +31,7 @@ services:
              - CATALOG_VERSION=v1
              - USERS_HOST=0.0.0.0
              - USERS_PORT=8083
-             - JAEGER_AGENT_HOST='localhost'
-             - JAEGER_AGENT_PORT=6831
+#             - JAEGER_AGENT_HOST='localhost'
+#             - JAEGER_AGENT_PORT=6831
         depends_on:
              - catalog-db

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gobuffalo/packr"
 	"io"
 	"os"
 
@@ -59,7 +60,9 @@ func handleRequest() {
 
 	router := gin.Default()
 
-	router.Static("/static/images", "./web")
+	//router.Static("/static/images", "./web")
+	box := packr.NewBox("./web")
+	router.StaticFS("/static/images", box)
 
 	nonAuthGroup := router.Group("/")
 	{
@@ -98,7 +101,7 @@ func main() {
 		logger.InitLogger(f)
 	}
 
-	dbsession := db.ConnectDB(dbName, collectionName)
+	db.ConnectDB(dbName, collectionName)
 
 	logger.Logger.Infof("Successfully connected to database %s", dbName)
 
@@ -108,7 +111,7 @@ func main() {
 
 	handleRequest()
 
-	db.CloseDB(dbsession)
+	//db.CloseDB(dbsession)
 
 	defer closer.Close()
 
